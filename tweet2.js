@@ -1,5 +1,5 @@
 const twitter = require('twitter');
-const keys = JSON.loads(process.env['SECRETS']);
+const keys = JSON.parse(process.env['SECRETS']);
 
 var client = new twitter({
     consumer_key:        keys.twitter[0],
