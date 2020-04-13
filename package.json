@@ -2,7 +2,7 @@
   "name": "mexfuture",
   "version": "1.0.0",
   "description": "",
-  "main": "testCode.js",
+  "main": "mainM20.js",
   "directories": {
     "lib": "lib"
   },
@@ -13,7 +13,7 @@
   },
   "devDependencies": {},
   "scripts": {
-	"start":"node testCode.js",
+	"start":"node mainM20.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
