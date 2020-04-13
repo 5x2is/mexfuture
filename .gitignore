@@ -1,6 +1,6 @@
 node_modules/
 WStest.js
-diff_log/
+dif_log/
 result/
 testCode.js
 tweet2.js

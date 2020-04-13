@@ -13,7 +13,7 @@
   },
   "devDependencies": {},
   "scripts": {
-	"start":"node mainM20.js",
+    "start": "node mainM20.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
