@@ -1,4 +1,4 @@
-const twitter = require('twitter');
-const fs = require('fs');
+const twitter = require('./tweet2.js');
 console.log("aaa");
+twitter.tweet("aaa");	
 
