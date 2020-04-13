@@ -275,7 +275,7 @@ function runWebSocket(){
 				if(ordFlag){
 					break;
 				}	
-				record.price();
+				//record.price();
 				tweetStat();
 				break;
 		}
@@ -730,7 +730,7 @@ function orderFinishProc(){
 			positions[ordNo].setCloseLimit();
 			console.log(positions[ordNo]);
 			//結果保存
-			record.trade(positions[ordNo]);	
+			//record.trade(positions[ordNo]);	
 			//ツイート
 			tweetTrade(positions[ordNo]);
 		}else if(orderDirection == "close"){
@@ -738,7 +738,7 @@ function orderFinishProc(){
 			positions[ordNo].setProfit(); 
 			console.log(positions[ordNo]);
 			//結果保存
-			record.trade(positions[ordNo]);	
+		//	record.trade(positions[ordNo]);	
 			//ツイート
 			tweetTrade(positions[ordNo]);
 			//クローズしたらposition削除
