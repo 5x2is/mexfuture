@@ -1,10 +1,11 @@
 const twitter = require('twitter');
+const keys = JSON.loads(os.environ.get('SECRETS'));
 
 var client = new twitter({
-    consumer_key: consumer_key,
-    consumer_secret: consumer_secret   , 
-    access_token_key: access_token_key   ,
-    access_token_secret:access_token_secret 
+    consumer_key:        keys.twitter[0],
+    consumer_secret:     keys.twitter[1],
+    access_token_key:    keys.twitter[2],
+    access_token_secret: keys.twitter[3],
 });
 
 exports.tweet=async(text)=>{
@@ -12,10 +13,10 @@ exports.tweet=async(text)=>{
 	const date = new Date().toLocaleString();
 	text = date +'\n'+text;
 	client.post('statuses/update', {status: text},function(error, tweet, response) {
-    if (!error) {
-        console.log('Tweet完了')
-    }else{
-		console.log(error);
-	}
-});
+	    if (!error) {
+	        console.log('Tweet完了')
+	    }else{
+			console.log(error);
+		}
+	});
 }
