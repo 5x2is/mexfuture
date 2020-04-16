@@ -151,11 +151,14 @@ function init(){
 	initOrderList();
 	profitTarget = 40;
 	//DBからpositionsにコピー
-	const rows = rowDatabase();
-	const length = rows.length;
-	for(let i = 0; i<length;i++){
-		positions[i] =  new Position(rows[i]);
-	}
+	rowDatabase().then((rows)=>{
+		console.log(rows[0].openLimit);
+		console.log(rows[1].openLimit);
+		const length = rows.length;
+		for(let i = 0; i<length;i++){
+			positions[i] =  new Position(rows[i]);
+		}
+	});
 	init_flag = {
 		all:false,
 		XBTLNG:false,
@@ -173,7 +176,6 @@ async function rowDatabase(){
 		conn = await pool.getConnection();
 		//テーブル全体を取得
 		rows = await conn.query('select * from positions');
-		wsLog(rows[0].openLimit);
 	}catch(err){
 		wsLog(err);
 	}finally{
@@ -1103,8 +1105,8 @@ io.on('connection',(socket)=>{
 	socket.on('message',(msg)=>{
 		if(msg == socketPass){
 			socketCon = true;
-			io.emit('message','接続成功ずら〜');
 			console.log('connection success');
+			io.emit('message','接続成功ずら〜');
 		}else{
 			io.emit('message','失敗ずら');
 		}
@@ -1115,7 +1117,7 @@ io.on('connection',(socket)=>{
 	});
 });
 function wsLog(logText){
-	console.log(logText);
+//	console.log(logText);
 	if(socketCon){
 		io.emit('message',logText);
 	}
