@@ -8,11 +8,11 @@ const io = require('socket.io')(http);
 const socketPass = process.env['SOCKETPASS'];
 //DB関係
 const mariadb = require('mariadb');
-const keys = JSON.parse(process.env['MARIA']);
+const Mkeys = JSON.parse(process.env['MARIA']);
 const pool = mariadb.createPool({
-	host:keys.mariadb[0],
+	host:Mkeys.mariadb[0],
 	user:'root',
-	password:keys.mariadb[1],
+	password:Mkeys.mariadb[1],
 	port:3306,
 	database:'my_database'
 });
