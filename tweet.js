@@ -1,13 +1,13 @@
 const twitter = require('twitter');
 const fs = require('fs');
 //const keys = JSON.parse(fs.readFileSync('../keys/keyList.json'));
-const keys = JSON.parse(process.env['SECRETS']);
+const Tkeys = JSON.parse(process.env['SECRETS']);
 
 var client = new twitter({
-    consumer_key:        keys.twitter[0],
-    consumer_secret:     keys.twitter[1],
-    access_token_key:    keys.twitter[2],
-    access_token_secret: keys.twitter[3],
+    consumer_key:        Tkeys.twitter[0],
+    consumer_secret:     Tkeys.twitter[1],
+    access_token_key:    Tkeys.twitter[2],
+    access_token_secret: Tkeys.twitter[3],
 });
 
 exports.tweet=async(text)=>{
