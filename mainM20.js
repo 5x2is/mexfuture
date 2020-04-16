@@ -1,4 +1,5 @@
 'use strict';
+console.log('v0001');
 //サーバ関係
 const express = require('express');
 const app = express();
@@ -158,7 +159,7 @@ function init(){
 		for(let i = 0; i<length;i++){
 			positions[i] =  new Position(rows[i]);
 		}
-		console.log(positions[2].closeLimit);
+		wsLog(positions[2].closeLimit);
 	});
 	init_flag = {
 		all:false,
