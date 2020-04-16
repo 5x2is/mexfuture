@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	    <title>log</title>
+		<script src="/socket.io/socket.io.js"></script>
+		<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+	</head>
+	<body>
+	    <h1>logを見るにはアクセスキーを入れるずら</h1>
+		<form name='myform'>
+			<input type="password" id='input_msg' autocomplete='off'>
+			<button name='btn'>接続するずら</button>
+		</form>
+		<ul>
+		</ul>
+		<script>
+			const socketio = io();
+			document.myform.btn.addEventListener('click',()=>{
+				event.preventDefault();
+				socketio.emit('message',$('#input_msg').val());
+				$('#input_msg').val('');
+			});
+			socketio.on('message',(msg)=>{
+				$("ul").append('<li>'+msg+'</li>');
+			});
+		</script>
+	</body>
+</html>
+

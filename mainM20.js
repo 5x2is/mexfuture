@@ -5,6 +5,7 @@ const app = express();
 const http = require('http').Server(app);
 const PORT = process.env.PORT || 4000;
 const io = require('socket.io')(http);
+const socketPass = process.env['SOCKETPASS'];
 //DB関係
 const mariadb = require('mariadb');
 const keys = JSON.parse(process.env['MARIA']);
@@ -1099,7 +1100,14 @@ function tweetStat(){
 //ログ出力
 var socketCon = false;
 io.on('connection',(socket)=>{
-	socketCon = true;
+	socket.on('message',(msg)=>{
+		if(msg == socketPass){
+			socketCon = true;
+			io.emit('message','接続成功ずら〜');
+		}else{
+			io.emit('message','失敗ずら');
+		}
+	});
 	socket.on('disconnect',()=>{
 		socketCon = false;
 	});
