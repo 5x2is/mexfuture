@@ -1,15 +1,17 @@
 {
   "name": "mexfuture",
   "version": "1.0.0",
-  "description": "",
   "main": "mainM20.js",
   "directories": {
     "lib": "lib"
   },
   "dependencies": {
+    "express": "^4.17.1",
+    "mariadb": "^2.3.1",
     "request": "^2.88.0",
-    "ws": "^7.2.1",
-    "twitter": "^1.7.1"
+    "socket.io": "^2.3.0",
+    "twitter": "^1.7.1",
+    "ws": "^7.2.1"
   },
   "devDependencies": {},
   "scripts": {
@@ -25,5 +27,6 @@
   "bugs": {
     "url": "https://github.com/5x2is/mexfuture/issues"
   },
-  "homepage": "https://github.com/5x2is/mexfuture#readme"
+  "homepage": "https://github.com/5x2is/mexfuture#readme",
+  "description": ""
 }

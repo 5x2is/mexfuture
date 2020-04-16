@@ -172,9 +172,9 @@ async function rowDatabase(){
 		conn = await pool.getConnection();
 		//テーブル全体を取得
 		rows = await conn.query('select * from positions');
-		console.log(rows[0].openLimit);
+		wsLog(rows[0].openLimit);
 	}catch(err){
-		console.log(err);
+		wsLog(err);
 	}finally{
 		if(conn){
 			conn.end();
@@ -223,7 +223,7 @@ function isExistFile(title){
 function runWebSocket(){
 	const connectionWS = new webSocket('wss://www.bitmex.com/realtime');
 	connectionWS.onopen = (open)=>{
-		console.log("WebSocketに接続");
+		wsLog("WebSocketに接続");
 		const timestamp = parseInt(Date.now()/1000+60);
 		const sign = crypto.createHmac('sha256',secret).update('GET/realtime'+timestamp).digest('hex');
 		const signup = JSON.stringify({
@@ -252,14 +252,14 @@ function runWebSocket(){
 				init_flag.margin = true;
 				break;
 			case "position":
-				//console.log("potision");
-				//console.log(message.data);
+				//wsLog("potision");
+				//wsLog(message.data);
 				//init_flag[5] = true;
 				break;
 			case "order":
 				//ポジションの照合
 				message.data.forEach((element)=>{
-				//	console.log(element);
+				//	wsLog(element);
 				});
 				//売買中フラグ立ってたら、売買モードに行く
 				if(ordFlag){
@@ -308,12 +308,12 @@ function runWebSocket(){
 		}
 	};
 	connectionWS.onerror= (err)=>{
-		console.log('error');
-		console.log(JSON.parse(err));
+		wsLog('error');
+		wsLog(JSON.parse(err));
 	};
 	connectionWS.onclose= ()=>{
 		//[task]closeした時の処置
-		console.log('close');
+		wsLog('close');
 		//[task]全部closeしてから再起動
 		connectionWS.send(JSON.stringify({op:"unsubscribe",args:['margin']}));
 		connectionWS.send(JSON.stringify({op:"unsubscribe",args:['order']}));
@@ -326,7 +326,7 @@ var lastLog = 0;
 function check(){
 	const date = new Date();
 	if(openDiff != lastLog){
-		console.log(date.getMinutes()+' open:'+openDiff+' close:'+closeDiff);
+		wsLog(date.getMinutes()+' open:'+openDiff+' close:'+closeDiff);
 		lastLog = openDiff;
 	}
 	const orderNonce = ''+date.getMinutes()+date.getSeconds();
@@ -334,7 +334,7 @@ function check(){
 	for(let i = 0;i<positions.length;i++){
 		if(positions[i].closeLimit){
 			if(closeDiff > positions[i].closeLimit){
-				console.log("ポジションクローズ"+date);
+				wsLog("ポジションクローズ"+date);
 				//LNG指値売り
 				sendOrder(limitData(LNG,"Sell",positions[i].LNGamount,price.LNGask,orderNonce));
 				LNGLimitOrder.nonce = orderNonce;
@@ -361,7 +361,7 @@ function check(){
 					if(currentLeverage > maxLeverage){
 						break;	
 						}		
-				console.log("ポジションオープン"+date);
+				wsLog("ポジションオープン"+date);
 				//LNG買い
 				sendOrder(limitData(LNG,"Buy",Math.round(orderAmount*price.LNGbid),price.LNGbid,orderNonce));
 				LNGLimitOrder.nonce = orderNonce;
@@ -428,7 +428,7 @@ const record = {
 	add(filetitle,dat){
 		fs.appendFile(filetitle,dat,(err)=>{
 			if(err){
-				console.log(err);
+				wsLog(err);
 			}else{
 				return;
 			}
@@ -437,7 +437,7 @@ const record = {
 	overWrite(filetitle,dat){
 		fs.writeFile(filetitle,dat,(err)=>{
 			if(err){
-				console.log(err);
+				wsLog(err);
 			}else{
 				return;
 			}
@@ -449,7 +449,7 @@ function orderChecker(orders){
 	const date = new Date();
 	const orderNonce = ''+date.getMinutes()+date.getSeconds();
 	orders.forEach((element)=>{
-		//console.log(element);
+		//wsLog(element);
 		switch(element.clOrdID){
 			//closeの場合とopenの場合
 			case"LNGLimit"+LNGLimitOrder.nonce:
@@ -457,10 +457,10 @@ function orderChecker(orders){
 				switch(LNGLimitOrder.target){
 					case "open":
 						if(element.workingIndicator== true){
-							console.log("LNGLimit発注成功");	
+							wsLog("LNGLimit発注成功");	
 							LNGLimitOrder.target= "fill";
 						}else if(element.ordStatus == "Canceled"){
-							console.log("LNGLimit発注失敗");
+							wsLog("LNGLimit発注失敗");
 							//発注失敗した場合、再発注
 							if(orderDirection == "open"){
 								if(positions[ordNo].LNGopenPrice == price.LNGbid){
@@ -471,7 +471,7 @@ function orderChecker(orders){
 									positions[ordNo].LNGopenPrice = price.LNGbid;
 								}
 								LNGLimitOrder.nonce = orderNonce;
-								console.log(price.LNGbid+"でLNGLimit再発注");
+								wsLog(price.LNGbid+"でLNGLimit再発注");
 							}else if(orderDirection == "close"){
 								if(positions[ordNo].LNGclosePrice == price.LNGask){
 									sendOrder(limitData(LNG,"Sell",positions[ordNo].LNGamount,price.LNGask+0.5,orderNonce));
@@ -481,17 +481,17 @@ function orderChecker(orders){
 									positions[ordNo].LNGclosePrice = price.LNGask;
 								}
 								LNGLimitOrder.nonce = orderNonce;
-								console.log(price.LNGask+"でLNGLimit再発注");
+								wsLog(price.LNGask+"でLNGLimit再発注");
 							}
 						}
 						break;
 					case "fill":
 						//約定した場合
 						if(element.ordStatus == "Filled"){
-							console.log("LNGLimit約定");	
+							wsLog("LNGLimit約定");	
 							LNGLimitOrder.stat = true;
 							if(orderDirection == "open"){
-								console.log(element);
+								wsLog(element);
 								positions[ordNo].openLNGFee = -0.00025;
 								positions[ordNo].LNGamount = element.cumQty;//書かない
 							}else if(orderDirection == "close"){
@@ -508,7 +508,7 @@ function orderChecker(orders){
 						}
 						if(element.leavesQty != 0){
 							//部分約定した場合
-							console.log("LNGLimit 部分約定");
+							wsLog("LNGLimit 部分約定");
 							//合計約定amount
 							LNGLimitOrder.partialExec = element.leavesQty ;
 						}
@@ -517,7 +517,7 @@ function orderChecker(orders){
 						//キャンセルが通った場合
 						if(element.ordStatus == "Canceled"){
 							if(LNGLimitOrder.partialExec){
-								console.log("部分約定あり、LNG反対決済");
+								wsLog("部分約定あり、LNG反対決済");
 								if(orderDirection == "open"){
 									sendOrder(marketData(LNG,"Sell",LNGLimitOrder.partialExec ,"LNGLimit"+orderNonce));
 								}else if(orderDirection == "close"){
@@ -526,12 +526,12 @@ function orderChecker(orders){
 								LNGLimitOrder.target= "forceCancel";
 								LNGLimitOrder.nonce = orderNonce;
 							}else{
-								console.log("LNGLimitキャンセル");	
+								wsLog("LNGLimitキャンセル");	
 								LNGLimitOrder.stat = true;
 							}
 						}else if(element.ordStatus == "Filled"){
 							//約定してしまった場合
-							console.log("filled!!!");
+							wsLog("filled!!!");
 							//強制反対注文
 							//[task] 両方反対注文が入らないようにする
 							if(orderDirection == "open"){
@@ -546,7 +546,7 @@ function orderChecker(orders){
 					case "forceCancel":
 						//強制キャンセルの確認
 						if(element.ordStatus == "Filled"){
-							console.log('LNGLimit強制キャンセル成功');	
+							wsLog('LNGLimit強制キャンセル成功');	
 							LNGLimitOrder.stat = true;
 						}
 						break;
@@ -555,13 +555,13 @@ function orderChecker(orders){
 			case"LNGStop"+LNGStopOrder.nonce:
 				switch(LNGStopOrder.target){
 					case "open":
-						console.log("LNGStop発注成功");	
+						wsLog("LNGStop発注成功");	
 						LNGStopOrder.target= "fill";
 						break;
 					case "fill":
 						//約定した場合
 						if(element.ordStatus == "Filled"){
-							console.log("LNGStop約定");	
+							wsLog("LNGStop約定");	
 							LNGStopOrder.stat = true;
 							if(orderDirection == "open"){
 								positions[ordNo].LNGopenPrice= element.avgPx; 
@@ -583,11 +583,11 @@ function orderChecker(orders){
 					case "cancel":
 						//キャンセルが通った場合
 						if(element.ordStatus == "Canceled"){
-							console.log("LNGStopキャンセル");	
+							wsLog("LNGStopキャンセル");	
 							LNGStopOrder.stat = true;
 						}else if(element.ordStatus == "Filled"){
 							//約定してしまった場合
-							console.log("filled!!!");
+							wsLog("filled!!!");
 							//強制反対注文
 							//[task] 両方反対注文が入らないようにする
 						}
@@ -598,10 +598,10 @@ function orderChecker(orders){
 				switch(MIDLimitOrder.target){
 					case "open":
 						if(element.workingIndicator== true){
-							console.log("MIDLimit発注成功");	
+							wsLog("MIDLimit発注成功");	
 							MIDLimitOrder.target= "fill";
 						}else if(element.ordStatus == "Canceled"){
-							console.log("MID発注失敗");
+							wsLog("MID発注失敗");
 							//発注失敗した場合、再発注
 							if(orderDirection == "open"){
 								if(positions[ordNo].MIDopenPrice == price.MIDask){
@@ -613,7 +613,7 @@ function orderChecker(orders){
 								}
 								positions[ordNo].MIDopenPrice = price.MIDask;
 								MIDLimitOrder.nonce = orderNonce;
-								console.log(price.MIDask+"で再発注");
+								wsLog(price.MIDask+"で再発注");
 							}else if(orderDirection == "close"){
 								if(positions[ordNo].MIDclosePrice == price.MIDbid){
 									sendOrder(limitData(MID,"Buy",positions[ordNo].MIDamount,price.MIDbid-0.5,orderNonce));
@@ -623,14 +623,14 @@ function orderChecker(orders){
 									positions[ordNo].MIDclosePrice = price.MIDbid;
 								}
 								MIDLimitOrder.nonce = orderNonce;
-								console.log(price.MIDbid+"で再発注");
+								wsLog(price.MIDbid+"で再発注");
 							}
 						}
 						break;
 					case "fill":
 						//約定した場合
 						if(element.ordStatus == "Filled"){
-							console.log("MIDLimit約定");	
+							wsLog("MIDLimit約定");	
 							MIDLimitOrder.stat = true;
 							if(orderDirection == "open"){
 								positions[ordNo].openMIDFee = -0.00025;
@@ -648,7 +648,7 @@ function orderChecker(orders){
 						}
 						if(element.leavesQty != 0){
 							//部分約定した場合
-							console.log("MIDLimit 部分約定");
+							wsLog("MIDLimit 部分約定");
 							//合計約定amount
 							MIDLimitOrder.partialExec = element.leavesQty ;
 						}
@@ -657,7 +657,7 @@ function orderChecker(orders){
 						//キャンセルが通った場合
 						if(element.ordStatus == "Canceled"){
 							if(MIDLimitOrder.partialExec){
-								console.log("部分約定あり、MID反対決済");
+								wsLog("部分約定あり、MID反対決済");
 								if(orderDirection == "open"){
 									sendOrder(marketData(MID,"Buy",MIDLimitOrder.partialExec,"MIDLimit"+orderNonce));
 								}else if(orderDirection == "close"){
@@ -666,13 +666,13 @@ function orderChecker(orders){
 								MIDLimitOrder.nonce = orderNonce;
 								MIDLimitOrder.target= "forceCancel";
 							}else{
-								console.log("MIDLimitキャンセル");	
+								wsLog("MIDLimitキャンセル");	
 								MIDLimitOrder.stat = true;
 							}
 						}else if(element.ordStatus == "Filled"){
 							//約定してしまった場合
 							//[task]部分約定
-							console.log("MIDfilled!!!");
+							wsLog("MIDfilled!!!");
 							//強制キャンセル
 							if(orderDirection == "open"){
 								sendOrder(marketData(MID,"Buy",positions[ordNo].MIDamount,"MIDLimit"+orderNonce));
@@ -686,7 +686,7 @@ function orderChecker(orders){
 					case "forceCancel":
 						//強制キャンセルの確認
 						if(element.ordStatus == "Filled"){
-							console.log('MIDLimit強制キャンセル成功');	
+							wsLog('MIDLimit強制キャンセル成功');	
 							MIDLimitOrder.stat = true;
 						}
 						break;
@@ -695,13 +695,13 @@ function orderChecker(orders){
 			case"MIDStop"+MIDStopOrder.nonce:
 				switch(MIDStopOrder.target){
 					case "open":
-						console.log("MIDStop発注成功");	
+						wsLog("MIDStop発注成功");	
 						MIDStopOrder.target= "fill";
 						break;
 					case "fill":
 						//約定した場合
 						if(element.ordStatus == "Filled"){
-							console.log("MIDStop約定");	
+							wsLog("MIDStop約定");	
 							MIDStopOrder.stat = true;
 							if(orderDirection == "open"){
 								positions[ordNo].MIDopenPrice= element.avgPx; 
@@ -723,11 +723,11 @@ function orderChecker(orders){
 					case "cancel":
 						//キャンセルが通った場合
 						if(element.ordStatus == "Canceled"){
-							console.log("MIDStopキャンセル");	
+							wsLog("MIDStopキャンセル");	
 							MIDStopOrder.stat = true;
 						}else if(element.ordStatus == "Filled"){
 							//約定してしまった場合
-							console.log("filled!!!");
+							wsLog("filled!!!");
 						}
 						break;
 				}
@@ -743,14 +743,14 @@ function orderFinishProc(){
 	//全部trueになったら終了
 	if(LNGLimitOrder.stat && LNGStopOrder.stat && MIDLimitOrder.stat && MIDStopOrder.stat){
 		ordFlag = false;
-		console.log('発注完了!!');
+		wsLog('発注完了!!');
 	}
 	//[task]forcecloseした時の計算
 	if(ordFlag == false){
 		if(orderDirection == "open"){
 			positions[ordNo].setOpenPrice();
 			positions[ordNo].setCloseLimit();
-			console.log(positions[ordNo]);
+			wsLog(positions[ordNo]);
 			//結果保存
 			//record.trade(positions[ordNo]);	
 			//ツイート
@@ -758,7 +758,7 @@ function orderFinishProc(){
 		}else if(orderDirection == "close"){
 			positions[ordNo].setClosePrice();
 			positions[ordNo].setProfit(); 
-			console.log(positions[ordNo]);
+			wsLog(positions[ordNo]);
 			//結果保存
 		//	record.trade(positions[ordNo]);	
 			//ツイート
@@ -801,7 +801,7 @@ async function recordPosition(){
 			conn = await pool.getConnection();
 			rows = await conn.query(queryText);
 		}catch(err){
-			console.log(err);
+			wsLog(err);
 		}finally{
 			if(conn){
 				conn.end();
@@ -834,14 +834,14 @@ function sendOrder(data){
 	//[task]エラーハンドリング
 	request(requestOptions, (error,response,body)=>{
 		if(error){
-			console.log('エラー');
-			console.log(error);
+			wsLog('エラー');
+			wsLog(error);
 		}
 		const message = JSON.parse(body);
 		if(message.error){
-			console.log("send error");
-			console.log(data.clOrdID);
-			console.log(message);
+			wsLog("send error");
+			wsLog(data.clOrdID);
+			wsLog(message);
 			mexError[data.symbol+data.ordType]= true;
 			switch(data.clOrdID){
 				case"LNGLimit"+LNGLimitOrder.nonce:
@@ -901,13 +901,13 @@ function cancelOrder(clOrdID){
 	//[task]エラーハンドリング
 	request(requestOptions, (error,response,body)=>{
 		if(error){
-			console.log(error);
+			wsLog(error);
 		}
 		const message = JSON.parse(body);
 		if(message.error){
-			console.log("cancel error");
-			console.log(clOrdID);
-			console.log(message);
+			wsLog("cancel error");
+			wsLog(clOrdID);
+			wsLog(message);
 			//もしcancel
 		}
 		return message;
@@ -950,14 +950,14 @@ function marketData(symbol,side,orderQty,nonce){
 }
 function reOrder(data){
 	//[task]targetがcancelになってるかどうかの確認
-	console.log("reorder");
-	console.log(data);
+	wsLog("reorder");
+	wsLog(data);
 	if(data.symbol == XBTLNG){
 		if(data.side == 'Buy'){
 			switch (data.ordType){
 				case 'Limit':
 					if(LNGLimitOrder.target != "open"){
-						console.log("LNG Limit return");
+						wsLog("LNG Limit return");
 						if(LNGStopOrder.target === true){
 							LNGLimitOrder.target = true;
 							orderFinishProc();
@@ -969,7 +969,7 @@ function reOrder(data){
 					break;
 				case 'Stop':
 					if(LNGStopOrder.target != "open"){
-						console.log("LNG stop return");
+						wsLog("LNG stop return");
 						if(LNGLimitOrder.target === true){
 							LNGStopOrder.target = true;
 							orderFinishProc();
@@ -983,7 +983,7 @@ function reOrder(data){
 			switch (data.ordType){
 				case 'Limit':
 					if(LNGLimitOrder.target != "open"){
-						console.log("LNG Limit return2");
+						wsLog("LNG Limit return2");
 						if(LNGStopOrder.target === true){
 							LNGLimitOrder.target = true;
 							orderFinishProc();
@@ -995,7 +995,7 @@ function reOrder(data){
 					break;
 				case 'Stop':
 					if(LNGStopOrder.target != "open"){
-						console.log("LNG stop return2");
+						wsLog("LNG stop return2");
 						if(LNGLimitOrder.target === true){
 							LNGStopOrder.target = true;
 							orderFinishProc();
@@ -1057,7 +1057,7 @@ function reOrder(data){
 			}
 		}
 	}
-	console.log("send reorder");
+	wsLog("send reorder");
 	sendOrder(data);
 }
 function tweetTrade(pos){
