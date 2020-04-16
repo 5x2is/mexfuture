@@ -1,5 +1,5 @@
 'use strict';
-console.log('v0002');
+console.log('v0003');
 //サーバ関係
 const express = require('express');
 const app = express();
@@ -1114,7 +1114,7 @@ io.on('connection',(socket)=>{
 		}
 	});
 	socket.on('disconnect',()=>{
-		socketCon = false;
+	//	socketCon = false;
 		wsLog('disconnect');
 	});
 });
