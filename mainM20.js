@@ -1,4 +1,21 @@
 'use strict';
+//サーバ関係
+const express = require('express');
+const app = express();
+const http = require('http').Server(app);
+const PORT = process.env.PORT || 4000;
+const io = require('socket.io')(http);
+//DB関係
+const mariadb = require('mariadb');
+const keys = JSON.parse(process.env['MARIA']);
+const pool = mariadb.createPool({
+	host:keys.mariadb[0],
+	user:'root',
+	password:keys.mariadb[1],
+	port:3306,
+	database:'my_database'
+});
+
 const crypto = require('crypto');
 const fs = require('fs');
 //const keys = JSON.parse(fs.readFileSync('../keys/keyList.json'));
@@ -132,19 +149,11 @@ function init(){
 	orderAmount = 0.02;
 	initOrderList();
 	profitTarget = 40;
-	//ポジションリスト、オープン閾値の読み込み
-	if(isExistFile('./position2.json')){
-		const savedPos = JSON.parse(fs.readFileSync('./position2.json'));
-		const lengthTmp = [savedPos];
-		const length = lengthTmp[0].length;
-		for(let i = 0; i<length;i++){
-			positions[i] =  new Position(savedPos[i]);
-		}
-	}else{
-		for(let i = 0; i<3;i++){
-			posObj.openLimit = i*20-10;
-			positions[i] = new Position(posObj);
-		}
+	//DBからpositionsにコピー
+	const rows = rowDatabase();
+	const length = rows.length;
+	for(let i = 0; i<length;i++){
+		positions[i] =  new Position(rows[i]);
 	}
 	init_flag = {
 		all:false,
@@ -154,6 +163,24 @@ function init(){
 		order:false
 	}
 	runWebSocket();
+}
+//MariaDBの読み込み
+async function rowDatabase(){
+	let conn;
+	let rows; 
+	try{
+		conn = await pool.getConnection();
+		//テーブル全体を取得
+		rows = await conn.query('select * from positions');
+		console.log(rows[0].openLimit);
+	}catch(err){
+		console.log(err);
+	}finally{
+		if(conn){
+			conn.end();
+			return rows;
+		}
+	}
 }
 var diffHis = {open:[],close:[]};
 function checkStat(){
@@ -389,11 +416,6 @@ const record = {
 			result.MIDamount + ','+
 			result.profit + ','+ '\n';
 		this.add(filetitle,dat);
-	},
-	position(){
-		const filetitle = "./position2.json";
-		const dat = JSON.stringify(positions,null,4);
-		this.overWrite(filetitle,dat);
 	},
 	date(){
 		const date = new Date();
@@ -755,8 +777,36 @@ function orderFinishProc(){
 		//orderList初期化
 		initOrderList();
 		//positionリスト保存
-		record.position();	
+		recordPosition();	
 		ordNo = -1;
+	}
+}
+async function recordPosition(){
+	let conn;
+	let rows; 
+	for(let i=0;i<positions.lenght;i++){
+		for(let j=0; j<Object.keys(positions[i]).lengthk ;j++){
+			let queryText = 'INSERT INTO positions '
+			let queryName = '(';
+			let queryValue = '(';
+			for(let key in positions[i]){
+				queryName += key+',';
+				queryValue += positions[i].key+',';
+			}
+			queryName = queryName.slice(0,1)+')';
+			queryValue = queryValue.slice(0,1)+')' ;
+			queryText+= queryName + queryValue + ';';
+		}
+		try{
+			conn = await pool.getConnection();
+			rows = await conn.query(queryText);
+		}catch(err){
+			console.log(err);
+		}finally{
+			if(conn){
+				conn.end();
+			}
+		}
 	}
 }
 //[task]class化
@@ -1046,3 +1096,22 @@ function tweetStat(){
 
 	twitter.tweet(text);
 }
+//ログ出力
+var socketCon = false;
+io.on('connection',(socket)=>{
+	socketCon = true;
+	socket.on('disconnect',()=>{
+		socketCon = false;
+	});
+});
+function wsLog(logText){
+	if(socketCon){
+		io.emit('message',logText);
+	}
+}
+app.get('/',(req,res)=>{
+	res.sendFile(__dirname+'/index.html');
+});
+http.listen(PORT,()=>{
+	console.log('server listening port:'+PORT);
+});
