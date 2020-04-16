@@ -1104,6 +1104,7 @@ io.on('connection',(socket)=>{
 		if(msg == socketPass){
 			socketCon = true;
 			io.emit('message','接続成功ずら〜');
+			console.log('connection success');
 		}else{
 			io.emit('message','失敗ずら');
 		}
@@ -1113,6 +1114,7 @@ io.on('connection',(socket)=>{
 	});
 });
 function wsLog(logText){
+	console.log(logText);
 	if(socketCon){
 		io.emit('message',logText);
 	}
