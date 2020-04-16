@@ -1,5 +1,5 @@
 'use strict';
-console.log('v0001');
+console.log('v0002');
 //サーバ関係
 const express = require('express');
 const app = express();
