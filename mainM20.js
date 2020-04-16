@@ -1108,8 +1108,7 @@ io.on('connection',(socket)=>{
 	socket.on('message',(msg)=>{
 		if(msg == socketPass){
 			socketCon = true;
-			wsLog('connection success');
-			io.emit('message','接続成功ずら〜');
+			wsLog('接続成功ずら〜');
 		}else{
 			io.emit('message','失敗ずら');
 		}
