@@ -158,6 +158,7 @@ function init(){
 		for(let i = 0; i<length;i++){
 			positions[i] =  new Position(rows[i]);
 		}
+		console.log(positions[2].closeLimit);
 	});
 	init_flag = {
 		all:false,
@@ -1102,22 +1103,23 @@ function tweetStat(){
 //ログ出力
 var socketCon = false;
 io.on('connection',(socket)=>{
+	wsLog('connection');
 	socket.on('message',(msg)=>{
 		if(msg == socketPass){
 			socketCon = true;
-			console.log('connection success');
+			wsLog('connection success');
 			io.emit('message','接続成功ずら〜');
 		}else{
 			io.emit('message','失敗ずら');
 		}
 	});
 	socket.on('disconnect',()=>{
-		console.log('disconnect');
 		socketCon = false;
+		wsLog('disconnect');
 	});
 });
 function wsLog(logText){
-//	console.log(logText);
+	console.log(logText);
 	if(socketCon){
 		io.emit('message',logText);
 	}
