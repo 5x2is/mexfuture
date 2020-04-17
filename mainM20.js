@@ -1,5 +1,5 @@
 'use strict';
-console.log('v0003');
+console.log('v0004');
 //サーバ関係
 const express = require('express');
 const app = express();
@@ -1104,7 +1104,6 @@ function tweetStat(){
 //ログ出力
 var socketCon = false;
 io.on('connection',(socket)=>{
-	wsLog('connection');
 	socket.on('message',(msg)=>{
 		if(msg == socketPass){
 			socketCon = true;
