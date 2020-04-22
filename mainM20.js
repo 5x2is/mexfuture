@@ -1,5 +1,6 @@
 'use strict';
 console.log('v0004');
+const debug = true;
 //サーバ関係
 const express = require('express');
 const app = express();
@@ -169,6 +170,7 @@ function init(){
 		order:false
 	}
 	runWebSocket();
+	recordPosition();	
 }
 //MariaDBの読み込み
 async function rowDatabase(){
@@ -329,6 +331,9 @@ function runWebSocket(){
 }
 var lastLog = 0;
 function check(){
+	if(debug){
+		return;	
+	}
 	const date = new Date();
 	if(openDiff != lastLog){
 		wsLog(date.getMinutes()+' open:'+openDiff+' close:'+closeDiff);
@@ -1105,24 +1110,27 @@ function tweetStat(){
 var socketCon = false;
 io.on('connection',(socket)=>{
 	socket.on('message',(msg)=>{
-		if(msg == socketPass){
-			socketCon = true;
-			wsLog('接続成功ずら〜');
-		}else{
-			io.emit('message','失敗ずら');
+		let emitText;
+		if(isNaN(msg)){
+			if(msg<logStack.lenght){
+				for(let i=0;i<logStack[msg].length;i++){
+					let emitText += logStack[msg][i] +'\n';
+				}
+				io.emit('message',emitText);
+			}
 		}
-	});
-	socket.on('disconnect',()=>{
-	//	socketCon = false;
-		wsLog('disconnect');
+		io.emit('message','数字を入力するずら');
 	});
 });
 function wsLog(logText){
 	console.log(logText);
-	if(socketCon){
-		io.emit('message',logText);
-	}
+	//log保存する
+	let logArea = Math.floor(logCount/300);
+	logStack[logArea].push(logText);
+	logCount++;
 }
+const logStack = [];
+var logCount = 0;
 app.get('/',(req,res)=>{
 	res.sendFile(__dirname+'/index.html');
 });

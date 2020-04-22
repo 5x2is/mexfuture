@@ -12,7 +12,7 @@ var client = new twitter({
 
 exports.tweet=async(text)=>{
 	//同じツイートがエラーになるの対策で日付を入れる。
-	const date = new Date().toLocaleString();
+	const date = new Date().toLocaleString({ timeZone: 'Asia/Tokyo' });
 	text = date +'\n'+text;
 	client.post('statuses/update', {status: text},function(error, tweet, response) {
 	    if (!error) {
