@@ -148,6 +148,7 @@ const checkInterval = setInterval(checkStat,1000);
 function init(){
 	//パラメータの読み込み
 	//syncで読み込み
+	console.log('start');
 	maxLeverage = 10;
 	orderAmount = 0.02;
 	initOrderList();
