@@ -1,5 +1,5 @@
 'use strict';
-console.log('v0005');
+console.log('v0006');
 const debug = true;
 //サーバ関係
 const express = require('express');
@@ -28,7 +28,8 @@ const twitter = require('./tweet.js');
 //APIキーの読み込み
 const key = keys.bitMex[0];
 const secret = keys.bitMex[1];
-
+//logの出力用
+const logStack = [];
 //Symbolの設定
 const XBTMID ='XBTM20';
 const XBTLNG ='XBTU20';
@@ -785,8 +786,8 @@ async function recordPosition(){
 	let conn;
 	let rows; 
 	for(let i=0;i<positions.lenght;i++){
+		let queryText = 'INSERT INTO positions '
 		for(let j=0; j<Object.keys(positions[i]).lengthk ;j++){
-			let queryText = 'INSERT INTO positions '
 			let queryName = '(';
 			let queryValue = '(';
 			for(let key in positions[i]){
@@ -1119,7 +1120,6 @@ function wsLog(logText){
 	logStack[logArea].push(logText);
 	logCount++;
 }
-const logStack = [];
 var logCount = 0;
 app.get('/',(req,res)=>{
 	res.sendFile(__dirname+'/index.html');
