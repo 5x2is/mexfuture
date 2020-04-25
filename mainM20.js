@@ -1,5 +1,5 @@
 'use strict';
-console.log('v0004');
+console.log('v0005');
 const debug = true;
 //サーバ関係
 const express = require('express');
@@ -7,7 +7,6 @@ const app = express();
 const http = require('http').Server(app);
 const PORT = process.env.PORT || 4000;
 const io = require('socket.io')(http);
-const socketPass = process.env['SOCKETPASS'];
 //DB関係
 const mariadb = require('mariadb');
 const Mkeys = JSON.parse(process.env['MARIA']);
@@ -143,7 +142,7 @@ function initOrderList(){
 }
 //ここから開始
 init();
-const checkInterval = setInterval(checkStat,1000);
+setInterval(checkStat,1000);
 
 function init(){
 	//パラメータの読み込み
@@ -218,19 +217,9 @@ function checkStat(){
 	}	
 }
 //record Objectを作成
-function isExistFile(title){
-	try{
-		fs.statSync(title);
-		return true;
-	}catch(err){
-		if(err.code === 'ENOENT'){
-			return false;
-		}
-	}
-}
 function runWebSocket(){
 	const connectionWS = new webSocket('wss://www.bitmex.com/realtime');
-	connectionWS.onopen = (open)=>{
+	connectionWS.onopen = ()=>{
 		wsLog("WebSocketに接続");
 		const timestamp = parseInt(Date.now()/1000+60);
 		const sign = crypto.createHmac('sha256',secret).update('GET/realtime'+timestamp).digest('hex');
@@ -306,7 +295,7 @@ function runWebSocket(){
 					}else{
 						break;
 					}
-				};
+				}
 				if(ordFlag){
 					break;
 				}	
