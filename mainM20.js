@@ -1115,7 +1115,7 @@ io.on('connection',(socket)=>{
 		if(isNaN(msg)){
 			if(msg<logStack.lenght){
 				for(let i=0;i<logStack[msg].length;i++){
-					let emitText += logStack[msg][i] +'\n';
+					emitText += logStack[msg][i] +'\n';
 				}
 				io.emit('message',emitText);
 			}
