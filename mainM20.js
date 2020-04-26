@@ -1,5 +1,5 @@
 'use strict';
-console.log('v0008');
+console.log('v0009');
 const debug = true;
 //サーバ関係
 const express = require('express');
@@ -1110,6 +1110,7 @@ io.on('connection',(socket)=>{
 			for(let i=0;i<logStack[msg].length;i++){
 				emitText += logStack[msg][i] +'\n';
 			}
+			wsLog("showLog");
 			io.emit('message',emitText);
 		}
 		io.emit('message',(logStack.length-1)+"以下の数を入力してください。");
