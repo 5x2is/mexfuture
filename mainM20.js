@@ -1103,13 +1103,14 @@ var socketCon = false;
 io.on('connection',(socket)=>{
 	socket.on('message',(msg)=>{
 		let emitText;
-		if(isNaN(msg)){
+		if(!isNaN(msg)){
 			if(msg<logStack.lenght){
 				for(let i=0;i<logStack[msg].length;i++){
 					emitText += logStack[msg][i] +'\n';
 				}
 				io.emit('message',emitText);
 			}
+			io.emit('message',(logStack.length-1)+"以下の数を入力してください。");
 		}
 		io.emit('message','数字を入力するずら');
 	});
