@@ -1105,7 +1105,7 @@ io.on('connection',(socket)=>{
 		let emitText;
 		msg = parseInt(msg,10);
 		wsLog(logStack.length)
-		if(msg>logStack.lenght){
+		if(msg >= logStack.lenght-1){
 			for(let i=0;i<logStack[msg].length;i++){
 				emitText += logStack[msg][i] +'\n';
 			}
