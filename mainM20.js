@@ -1,5 +1,5 @@
 'use strict';
-console.log('v0007');
+console.log('v0008');
 const debug = true;
 //サーバ関係
 const express = require('express');
@@ -1104,7 +1104,8 @@ io.on('connection',(socket)=>{
 	socket.on('message',(msg)=>{
 		let emitText;
 		msg = parseInt(msg,10);
-		wsLog(logStack.length)
+		wsLog(logStack.length);
+		wsLog("msg"+msg);
 		if(msg >= logStack.lenght-1){
 			for(let i=0;i<logStack[msg].length;i++){
 				emitText += logStack[msg][i] +'\n';
