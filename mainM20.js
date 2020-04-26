@@ -1103,7 +1103,9 @@ function tweetStat(){
 io.on('connection',(socket)=>{
 	socket.on('message',(msg)=>{
 		let emitText;
-		if(msg<logStack.lenght){
+		msg = parseInt(msg,10);
+		wsLog(logStack.length)
+		if(msg>logStack.lenght){
 			for(let i=0;i<logStack[msg].length;i++){
 				emitText += logStack[msg][i] +'\n';
 			}
